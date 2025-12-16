@@ -1,0 +1,158 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+}
+
+version = mod_version
+group = mod_group_id
+
+base {
+    archivesName = mod_id
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+
+repositories {
+    // Data Fixer Slayer
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+    // Jei, Cucumber, Botany Pots, Bookshelf, Ender Storage, Code Chicken Lib, The One Probe
+    repositories {
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = "Modrinth"
+                    url = "https://api.modrinth.com/maven"
+                }
+            }
+            forRepositories(fg.repository)
+            filter {
+                includeGroup "maven.modrinth"
+            }
+        }
+    }
+    // Ender Storage, Code Chicken Lib
+    maven {
+        url = "https://maven.covers1624.net"
+    }
+    // Botany Pots
+    maven {
+        url = "https://maven.blamejared.com"
+    }
+}
+
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+minecraft {
+    mappings channel: mapping_channel, version: mapping_version
+    copyIdeResources = true
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                "${mod_id}" {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        client {
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+        }
+
+        server {
+            args '--nogui'
+        }
+
+        data {
+            workingDirectory project.file('run-data')
+            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    // JEI (to view recipes)
+    runtimeOnly fg.deobf("maven.modrinth:jei:92yH4H3m")
+    compileOnly fg.deobf("mezz.jei:jei-1.16.5:7.8.0.1013:api")
+
+    // Data Fixer Slayer (for faster game start)
+    runtimeOnly fg.deobf("curse.maven:datafixerslayer-416519:3156420")
+
+    // Cucumber Library (to view Tags)
+    runtimeOnly fg.deobf("maven.modrinth:cucumber:E0dxPJOm")
+
+    // Botany Pots
+    runtimeOnly fg.deobf("maven.modrinth:botany-pots:A2kF6L1y")
+    implementation fg.deobf("net.darkhax.botanybots:BotanyPots-1.16.5:7.1.41")
+    // Bookshelf dependency
+    runtimeOnly fg.deobf("maven.modrinth:bookshelf-lib:mPFia1Xd")
+    implementation fg.deobf("net.darkhax.bookshelf:Bookshelf-Forge-1.16.5:10.4.33")
+
+    // Ender Storage
+    runtimeOnly fg.deobf("maven.modrinth:ender-storage:ZdVszA3A")
+    implementation fg.deobf("codechicken:EnderStorage:1.16.5-2.8.0.170:universal")
+    // Code Chicken Lib dependency
+    runtimeOnly fg.deobf("maven.modrinth:codechicken-lib:BqfOof5h")
+    implementation fg.deobf("codechicken:CodeChickenLib:1.16.5-4.0.7.445:universal")
+
+    // TOP (The one probe)
+    runtimeOnly fg.deobf("maven.modrinth:the-one-probe:yvmnexiQ")
+    compileOnly fg.deobf("maven.modrinth:the-one-probe:yvmnexiQ")
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [minecraft_version   : minecraft_version, minecraft_version_range: minecraft_version_range,
+                             forge_version       : forge_version, forge_version_range: forge_version_range,
+                             loader_version_range: loader_version_range,
+                             mod_id              : mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
+                             mod_authors         : mod_authors, mod_description: mod_description,]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
+}
+
+tasks.named('jar', Jar).configure {
+    manifest {
+        attributes(['Specification-Title'     : mod_id,
+                    'Specification-Vendor'    : mod_authors,
+                    'Specification-Version'   : '1',
+                    'Implementation-Title'    : project.name,
+                    'Implementation-Version'  : project.jar.archiveVersion,
+                    'Implementation-Vendor'   : mod_authors,
+                    'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")])
+    }
+    finalizedBy 'reobfJar'
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}

@@ -1,0 +1,23 @@
+{
+    "type": "enderbotanypots:crafting_enderbotanypot",
+    "group": "enderbotanypots",
+    "ingredients": [
+        {
+            "tag": "botanypots:hopper_botany_pots"
+        },
+        [
+            {
+                "item": "enderstorage:ender_chest"
+            },
+            {
+                "item": "enderstorage:ender_tank"
+            },
+            {
+                "item": "enderstorage:ender_pouch"
+            }
+        ]
+    ],
+    "result": {
+        "item": "enderbotanypots:ender_botany_pot"
+    }
+}
