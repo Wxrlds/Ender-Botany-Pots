@@ -3,7 +3,8 @@ package eu.wxrlds.enderbotanypots.util;
 import codechicken.enderstorage.item.ItemEnderPouch;
 import codechicken.enderstorage.item.ItemEnderStorage;
 import eu.wxrlds.enderbotanypots.EnderBotanyPots;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
+
 
 public class EnderBotanyPotHelper {
     // Checks if the item is a valid source of Frequency data.

@@ -1,21 +1,22 @@
 package eu.wxrlds.enderbotanypots.recipe.EnderBotanyPotRecipe;
 
+
 import codechicken.enderstorage.api.Frequency;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import eu.wxrlds.enderbotanypots.EnderBotanyPots;
 import eu.wxrlds.enderbotanypots.util.EnderBotanyPotHelper;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.ShapedRecipe;
-import net.minecraft.item.crafting.ShapelessRecipe;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.core.NonNullList;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
@@ -29,7 +30,7 @@ public class EnderBotanyPotRecipe extends ShapelessRecipe {
 
     @Nonnull
     @Override
-    public ItemStack assemble(CraftingInventory inv) {
+    public ItemStack assemble(CraftingContainer inv) {
         // Get the result defined in the JSON (The Ender Botany Pot)
         ItemStack result = super.assemble(inv);
 
@@ -50,23 +51,23 @@ public class EnderBotanyPotRecipe extends ShapelessRecipe {
     }
 
     @Override
-    public IRecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<?> getSerializer() {
         return EnderBotanyPots.ENDER_BOTANY_POT_RECIPE.get();
     }
 
     // Serializer for the recipe type so that it can be loaded from JSON
     // Main logic from Ender Storage / covers1624
-    public static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<EnderBotanyPotRecipe> {
+    public static class Serializer extends ForgeRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<EnderBotanyPotRecipe> {
         @Override
         public EnderBotanyPotRecipe fromJson(ResourceLocation recipeId, JsonObject json) {
-            String group = JSONUtils.getAsString(json, "group", "");
-            NonNullList<Ingredient> ingredients = readIngredients(JSONUtils.getAsJsonArray(json, "ingredients"));
+            String group = GsonHelper.getAsString(json, "group", "");
+            NonNullList<Ingredient> ingredients = readIngredients(GsonHelper.getAsJsonArray(json, "ingredients"));
             if (ingredients.isEmpty()) {
                 throw new JsonParseException("No ingredients for shapeless recipe");
             } else if (ingredients.size() > 9) {
                 throw new JsonParseException("Too many ingredients for shapeless recipe");
             } else {
-                ItemStack result = ShapedRecipe.itemFromJson(JSONUtils.getAsJsonObject(json, "result"));
+                ItemStack result = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(json, "result"));
                 return new EnderBotanyPotRecipe(recipeId, group, result, ingredients);
             }
         }
@@ -83,7 +84,7 @@ public class EnderBotanyPotRecipe extends ShapelessRecipe {
         }
 
         @Override
-        public EnderBotanyPotRecipe fromNetwork(ResourceLocation recipeId, PacketBuffer buffer) {
+        public EnderBotanyPotRecipe fromNetwork(ResourceLocation recipeId, FriendlyByteBuf buffer) {
             String group = buffer.readUtf(32767);
             int i = buffer.readVarInt();
             NonNullList<Ingredient> ingredients = NonNullList.withSize(i, Ingredient.EMPTY);
@@ -93,7 +94,7 @@ public class EnderBotanyPotRecipe extends ShapelessRecipe {
         }
 
         @Override
-        public void toNetwork(PacketBuffer buffer, EnderBotanyPotRecipe recipe) {
+        public void toNetwork(FriendlyByteBuf buffer, EnderBotanyPotRecipe recipe) {
             buffer.writeUtf(recipe.getGroup());
             buffer.writeVarInt(recipe.getIngredients().size());
             for (Ingredient ingredient : recipe.getIngredients()) {
