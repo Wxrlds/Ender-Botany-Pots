@@ -6,11 +6,8 @@ import eu.wxrlds.enderbotanypots.EnderBotanyPots;
 import eu.wxrlds.enderbotanypots.util.EnderBotanyPotHelper;
 import net.darkhax.botanypots.block.BlockBotanyPot;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -98,7 +95,7 @@ public class BlockEnderBotanyPot extends BlockBotanyPot {
                 // Security Check: If the pot has an owner, only THAT owner can change it.
                 if (currentFreq.hasOwner() && !player.getUUID().equals(currentFreq.getOwner())) {
                     if (!level.isClientSide) {
-                        player.sendMessage(new TranslatableComponent("enderbotanypots.chat.not_owner").withStyle(ChatFormatting.RED), Util.NIL_UUID);
+                        player.sendSystemMessage(Component.translatable("enderbotanypots.chat.not_owner").withStyle(ChatFormatting.RED));
                     }
                     return InteractionResult.FAIL;
                 }
@@ -122,21 +119,21 @@ public class BlockEnderBotanyPot extends BlockBotanyPot {
 
     // Helper to send a formatted chat message when the frequency changes
     private void sendFrequencyMessage(Player player, Frequency freq) {
-        TranslatableComponent msg = new TranslatableComponent("enderbotanypots.chat.frequency_changed");
-        msg.append(new TextComponent(": "));
+        var msg = Component.translatable("enderbotanypots.chat.frequency_changed");
+        msg.append(Component.literal(": "));
         msg.append(freq.getTooltip());
 
         if (freq.hasOwner()) {
-            msg.append(new TextComponent(" ("));
+            msg.append(Component.literal(" ("));
             msg.append(freq.getOwnerName());
-            msg.append(new TextComponent(")"));
+            msg.append(Component.literal(")"));
         }
 
-        player.sendMessage(msg, Util.NIL_UUID);
+        player.sendSystemMessage(msg);
     }
 
     // Adds frequency and owner information as well as a general small text
-    private static final Component TOOLTIP_NORMAL = new TranslatableComponent("enderbotanypots.tooltip.enderpot").withStyle(ChatFormatting.GRAY);
+    private static final Component TOOLTIP_NORMAL = Component.translatable("enderbotanypots.tooltip.enderpot").withStyle(ChatFormatting.GRAY);
 
     @Override
     @OnlyIn(Dist.CLIENT)

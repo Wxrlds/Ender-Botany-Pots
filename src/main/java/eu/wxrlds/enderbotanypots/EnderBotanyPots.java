@@ -6,8 +6,6 @@ import eu.wxrlds.enderbotanypots.block.BlockEntityEnderBotanyPot;
 import eu.wxrlds.enderbotanypots.compat.top.EnderBotanyPotsTOPPlugin;
 import eu.wxrlds.enderbotanypots.recipe.EnderBotanyPotRecipe.EnderBotanyPotRecipe;
 import net.darkhax.botanypots.block.BotanyPotRenderer;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -31,6 +29,7 @@ import net.minecraftforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+
 @Mod(EnderBotanyPots.MOD_ID)
 public class EnderBotanyPots {
     public static final String MOD_ID = "enderbotanypots";
@@ -47,7 +46,7 @@ public class EnderBotanyPots {
     // Setup to register the Ender Botany Pot
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MOD_ID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MOD_ID);
-    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITIES, MOD_ID);
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MOD_ID);
     public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, MOD_ID);
 
     public static final RegistryObject<Block> ENDER_BOTANY_POT = BLOCKS.register("ender_botany_pot", BlockEnderBotanyPot::new);
@@ -56,8 +55,8 @@ public class EnderBotanyPots {
     public static final RegistryObject<RecipeSerializer<?>> ENDER_BOTANY_POT_RECIPE = RECIPE_SERIALIZERS.register("crafting_enderbotanypot", EnderBotanyPotRecipe.Serializer::new);
 
 
-    public EnderBotanyPots() {
-        IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
+    public EnderBotanyPots(FMLJavaModLoadingContext context) {
+        IEventBus eventBus = context.getModEventBus();
 
         // Register mod content
         BLOCKS.register(eventBus);
@@ -78,7 +77,7 @@ public class EnderBotanyPots {
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
-        ItemBlockRenderTypes.setRenderLayer(ENDER_BOTANY_POT.get(), RenderType.cutout());
+//        ItemBlockRenderTypes.setRenderLayer(ENDER_BOTANY_POT.get(), RenderType.cutout());
     }
 
     private void registerRenderers(final EntityRenderersEvent.RegisterRenderers event) {

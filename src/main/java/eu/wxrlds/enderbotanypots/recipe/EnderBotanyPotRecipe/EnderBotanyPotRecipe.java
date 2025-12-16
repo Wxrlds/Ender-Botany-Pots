@@ -17,9 +17,9 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
+
 
 // Custom recipe class to copy the NBT (frequency) from an ingredient (Ender Chest/Tank/Pouch) to the result
 public class EnderBotanyPotRecipe extends ShapelessRecipe {
@@ -57,7 +57,7 @@ public class EnderBotanyPotRecipe extends ShapelessRecipe {
 
     // Serializer for the recipe type so that it can be loaded from JSON
     // Main logic from Ender Storage / covers1624
-    public static class Serializer extends ForgeRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<EnderBotanyPotRecipe> {
+    public static class Serializer implements RecipeSerializer<EnderBotanyPotRecipe> {
         @Override
         public EnderBotanyPotRecipe fromJson(ResourceLocation recipeId, JsonObject json) {
             String group = GsonHelper.getAsString(json, "group", "");

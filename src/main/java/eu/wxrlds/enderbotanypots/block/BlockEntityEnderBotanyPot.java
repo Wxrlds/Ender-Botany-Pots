@@ -31,7 +31,7 @@ public class BlockEntityEnderBotanyPot extends BlockEntityBotanyPot {
     private long rngSeed;
 
     public BlockEntityEnderBotanyPot(BlockPos pos, BlockState state) {
-        super(pos, state);
+        super(EnderBotanyPots.ENDER_BOTANY_POT_TILE.get(), pos, state);
         this.refreshRandom();
     }
 

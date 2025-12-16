@@ -7,7 +7,8 @@ import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.darkhax.botanypots.addons.jei.JEIPlugin;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
@@ -23,7 +24,8 @@ public class EnderBotanyPotsJEIPlugin implements IModPlugin {
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
         registration.addRecipeCatalyst(
                 new ItemStack(EnderBotanyPots.ENDER_BOTANY_POT.get()),
-                ResourceLocation.fromNamespaceAndPath("botanypots", "soil"));
+                JEIPlugin.CROP
+        );
     }
 
     @Override
@@ -31,8 +33,8 @@ public class EnderBotanyPotsJEIPlugin implements IModPlugin {
         // Add the description info
         registration.addIngredientInfo(
                 new ItemStack(EnderBotanyPots.ENDER_BOTANY_POT.get()),
-                VanillaTypes.ITEM,
-                new TranslatableComponent("enderbotanypots.jei.description")
+                VanillaTypes.ITEM_STACK,
+                Component.translatable("enderbotanypots.jei.description")
         );
     }
 }

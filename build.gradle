@@ -56,7 +56,6 @@ minecraft {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-
             mods {
                 "${mod_id}" {
                     source sourceSets.main
@@ -86,42 +85,44 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     // JEI (to view recipes)
-    runtimeOnly fg.deobf("maven.modrinth:jei:k3W3h9cO")
-    compileOnly fg.deobf("mezz.jei:jei-1.17.1:8.3.1.1002:api")
+    runtimeOnly fg.deobf("maven.modrinth:jei:LIkb8oaL")
+    compileOnly fg.deobf("mezz.jei:jei-1.19.2-common-api:11.8.1.1034")
 
     // Lazy DFU for faster game start
-    runtimeOnly fg.deobf("curse.maven:lazy-dfu-forge-460819:3544496")
+    runtimeOnly fg.deobf("curse.maven:lazy-dfu-forge-460819:4327266")
 
-    // Cucumber Library (to view Tags)
-    runtimeOnly fg.deobf("maven.modrinth:cucumber:gPnt4RpR")
+    // Cucumber Library (to view tags)
+    runtimeOnly fg.deobf("maven.modrinth:cucumber:dvkVwxka")
 
     // Botany Pots
-    runtimeOnly fg.deobf("maven.modrinth:botany-pots:jieavSfv")
-    implementation fg.deobf("net.darkhax.botanypots:BotanyPots-Common-1.18.2:8.1.28")
-    implementation fg.deobf("net.darkhax.botanypots:BotanyPots-Forge-1.18.2:8.1.28")
+    runtimeOnly fg.deobf("maven.modrinth:botany-pots:eZZTpS4W")
+    implementation fg.deobf("net.darkhax.botanypots:BotanyPots-Forge-1.19.2:9.0.44")
+    implementation fg.deobf("net.darkhax.botanypots:BotanyPots-Common-1.19.2:9.0.44")
     // Bookshelf dependency
-    runtimeOnly fg.deobf("maven.modrinth:bookshelf-lib:dPZreKSP")
-    implementation fg.deobf("net.darkhax.bookshelf:Bookshelf-Common-1.18.2:13.3.56")
-    implementation fg.deobf("net.darkhax.bookshelf:Bookshelf-Forge-1.18.2:13.3.56")
+    runtimeOnly fg.deobf("maven.modrinth:bookshelf-lib:IL6yVQcP")
+    implementation fg.deobf("net.darkhax.bookshelf:Bookshelf-Common-1.19.2:16.3.20")
+    implementation fg.deobf("net.darkhax.bookshelf:Bookshelf-Forge-1.19.2:16.3.20")
 
     // Ender Storage
-    runtimeOnly fg.deobf("maven.modrinth:ender-storage:klK0FXvK")
-    implementation fg.deobf("codechicken:EnderStorage:1.18.2-2.9.0.182:universal")
+    runtimeOnly fg.deobf("maven.modrinth:ender-storage:Qb3wNrDW")
+    implementation fg.deobf("codechicken:EnderStorage:1.19.2-2.10.1.181:universal")
     // Code Chicken Lib dependency
-    runtimeOnly fg.deobf("maven.modrinth:codechicken-lib:DKyMgZwQ")
-    implementation fg.deobf("codechicken:CodeChickenLib:1.18.2-4.1.4.488:universal")
+    runtimeOnly fg.deobf("maven.modrinth:codechicken-lib:MoblXfOv")
+    implementation fg.deobf("codechicken:CodeChickenLib:1.19.2-4.3.2.490:universal")
 
     // TOP (The one probe)
-    runtimeOnly fg.deobf("maven.modrinth:the-one-probe:pWurhZji")
-    compileOnly fg.deobf("maven.modrinth:the-one-probe:pWurhZji")
+    runtimeOnly fg.deobf("maven.modrinth:the-one-probe:KCnKC3d7")
+    compileOnly fg.deobf("maven.modrinth:the-one-probe:KCnKC3d7")
 }
 
 tasks.named('processResources', ProcessResources).configure {
-    var replaceProperties = [minecraft_version   : minecraft_version, minecraft_version_range: minecraft_version_range,
-                             forge_version       : forge_version, forge_version_range: forge_version_range,
-                             loader_version_range: loader_version_range,
-                             mod_id              : mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
-                             mod_authors         : mod_authors, mod_description: mod_description,]
+    var replaceProperties = [
+            minecraft_version   : minecraft_version, minecraft_version_range: minecraft_version_range,
+            forge_version       : forge_version, forge_version_range: forge_version_range,
+            loader_version_range: loader_version_range,
+            mod_id              : mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
+            mod_authors         : mod_authors, mod_description: mod_description,
+    ]
     inputs.properties replaceProperties
 
     filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
@@ -131,13 +132,15 @@ tasks.named('processResources', ProcessResources).configure {
 
 tasks.named('jar', Jar).configure {
     manifest {
-        attributes(['Specification-Title'     : mod_id,
-                    'Specification-Vendor'    : mod_authors,
-                    'Specification-Version'   : '1',
-                    'Implementation-Title'    : project.name,
-                    'Implementation-Version'  : project.jar.archiveVersion,
-                    'Implementation-Vendor'   : mod_authors,
-                    'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")])
+        attributes([
+                'Specification-Title'     : mod_id,
+                'Specification-Vendor'    : mod_authors,
+                'Specification-Version'   : '1',
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : project.jar.archiveVersion,
+                'Implementation-Vendor'   : mod_authors,
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
     }
     finalizedBy 'reobfJar'
 }

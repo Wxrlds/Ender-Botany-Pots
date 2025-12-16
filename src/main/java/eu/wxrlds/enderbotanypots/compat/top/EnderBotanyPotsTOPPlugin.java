@@ -6,8 +6,7 @@ import eu.wxrlds.enderbotanypots.EnderBotanyPots;
 import eu.wxrlds.enderbotanypots.block.BlockEnderBotanyPot;
 import eu.wxrlds.enderbotanypots.block.BlockEntityEnderBotanyPot;
 import mcjty.theoneprobe.api.*;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -38,15 +37,15 @@ public class EnderBotanyPotsTOPPlugin implements Function<ITheOneProbe, Void>, I
                 Frequency freq = pot.getFrequency();
 
                 // Frequency Line
-                TranslatableComponent freqText = new TranslatableComponent("enderbotanypots.tooltip.frequency");
-                freqText.append(new TextComponent(": "));
+                var freqText = Component.translatable("enderbotanypots.tooltip.frequency");
+                freqText.append(Component.literal(": "));
                 freqText.append(freq.getTooltip());
                 info.text(freqText);
 
                 // Owner Line
                 if (freq.hasOwner()) {
-                    TranslatableComponent ownerText = new TranslatableComponent("enderbotanypots.tooltip.owner");
-                    ownerText.append(new TextComponent(": "));
+                    var ownerText = Component.translatable("enderbotanypots.tooltip.owner");
+                    ownerText.append(Component.literal(": "));
                     ownerText.append(freq.getOwnerName());
                     info.text(ownerText);
                 }

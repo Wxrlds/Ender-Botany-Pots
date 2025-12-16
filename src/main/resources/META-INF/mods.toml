@@ -33,7 +33,7 @@ side = "BOTH"
 [[dependencies.${ mod_id }]]
 modId = "botanypots"
 mandatory = true
-versionRange = "[1.18.2-8,)"
+versionRange = "[1.19.2-9,)"
 ordering = "NONE"
 side = "BOTH"
 
@@ -41,6 +41,6 @@ side = "BOTH"
 [[dependencies.${ mod_id }]]
 modId = "enderstorage"
 mandatory = true
-versionRange = "[1.18.2-2.9,)"
+versionRange = "[1.19.2-2.10,)"
 ordering = "NONE"
 side = "BOTH"
