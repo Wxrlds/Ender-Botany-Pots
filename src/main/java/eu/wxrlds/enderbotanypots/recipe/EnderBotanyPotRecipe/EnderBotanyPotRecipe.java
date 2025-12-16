@@ -8,15 +8,13 @@ import com.google.gson.JsonParseException;
 import eu.wxrlds.enderbotanypots.EnderBotanyPots;
 import eu.wxrlds.enderbotanypots.util.EnderBotanyPotHelper;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.ShapedRecipe;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.minecraft.world.item.crafting.*;
 
 import javax.annotation.Nonnull;
 
@@ -25,14 +23,14 @@ import javax.annotation.Nonnull;
 public class EnderBotanyPotRecipe extends ShapelessRecipe {
 
     public EnderBotanyPotRecipe(ResourceLocation id, String group, ItemStack result, NonNullList<Ingredient> ingredients) {
-        super(id, group, result, ingredients);
+        super(id, group, CraftingBookCategory.MISC, result, ingredients);
     }
 
     @Nonnull
     @Override
-    public ItemStack assemble(CraftingContainer inv) {
+    public ItemStack assemble(CraftingContainer inv, RegistryAccess registryAccess) {
         // Get the result defined in the JSON (The Ender Botany Pot)
-        ItemStack result = super.assemble(inv);
+        ItemStack result = super.assemble(inv, registryAccess);
 
         // Loop through the grid
         for (int i = 0; i < inv.getContainerSize(); i++) {
@@ -100,7 +98,7 @@ public class EnderBotanyPotRecipe extends ShapelessRecipe {
             for (Ingredient ingredient : recipe.getIngredients()) {
                 ingredient.toNetwork(buffer);
             }
-            buffer.writeItem(recipe.getResultItem());
+            buffer.writeItem(recipe.getResultItem(RegistryAccess.EMPTY));
         }
     }
 }

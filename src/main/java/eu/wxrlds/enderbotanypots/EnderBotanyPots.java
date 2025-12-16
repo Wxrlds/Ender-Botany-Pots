@@ -6,6 +6,8 @@ import eu.wxrlds.enderbotanypots.block.BlockEntityEnderBotanyPot;
 import eu.wxrlds.enderbotanypots.compat.top.EnderBotanyPotsTOPPlugin;
 import eu.wxrlds.enderbotanypots.recipe.EnderBotanyPotRecipe.EnderBotanyPotRecipe;
 import net.darkhax.botanypots.block.BotanyPotRenderer;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -29,30 +31,27 @@ import net.minecraftforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-
 @Mod(EnderBotanyPots.MOD_ID)
 public class EnderBotanyPots {
     public static final String MOD_ID = "enderbotanypots";
     private static final Logger LOGGER = LogManager.getLogger();
 
-    // Creative Tab
-    public static final CreativeModeTab ENDERBOTANYPOTS_GROUP = new CreativeModeTab("enderbotanypots") {
-        @Override
-        public ItemStack makeIcon() {
-            return new ItemStack(ENDER_BOTANY_POT.get());
-        }
-    };
 
-    // Setup to register the Ender Botany Pot
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MOD_ID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MOD_ID);
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MOD_ID);
     public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, MOD_ID);
+    public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MOD_ID);
 
     public static final RegistryObject<Block> ENDER_BOTANY_POT = BLOCKS.register("ender_botany_pot", BlockEnderBotanyPot::new);
-    public static final RegistryObject<Item> ENDER_BOTANY_POT_ITEM = ITEMS.register("ender_botany_pot", () -> new BlockItem(ENDER_BOTANY_POT.get(), new Item.Properties().tab(ENDERBOTANYPOTS_GROUP)));
+    public static final RegistryObject<Item> ENDER_BOTANY_POT_ITEM = ITEMS.register("ender_botany_pot", () -> new BlockItem(ENDER_BOTANY_POT.get(), new Item.Properties()));
     public static final RegistryObject<BlockEntityType<BlockEntityEnderBotanyPot>> ENDER_BOTANY_POT_TILE = BLOCK_ENTITY.register("ender_botany_pot", () -> BlockEntityType.Builder.of(BlockEntityEnderBotanyPot::new, ENDER_BOTANY_POT.get()).build(null));
     public static final RegistryObject<RecipeSerializer<?>> ENDER_BOTANY_POT_RECIPE = RECIPE_SERIALIZERS.register("crafting_enderbotanypot", EnderBotanyPotRecipe.Serializer::new);
+    public static final RegistryObject<CreativeModeTab> TAB = CREATIVE_TABS.register("enderbotanypots", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.enderbotanypots"))
+            .icon(() -> new ItemStack(ENDER_BOTANY_POT.get()))
+            .displayItems((params, output) -> output.accept(ENDER_BOTANY_POT.get()))
+            .build());
 
 
     public EnderBotanyPots(FMLJavaModLoadingContext context) {
@@ -63,6 +62,7 @@ public class EnderBotanyPots {
         ITEMS.register(eventBus);
         BLOCK_ENTITY.register(eventBus);
         RECIPE_SERIALIZERS.register(eventBus);
+        CREATIVE_TABS.register(eventBus);
 
         eventBus.addListener(this::setup);
         eventBus.addListener(this::enqueueIMC);
@@ -77,7 +77,6 @@ public class EnderBotanyPots {
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
-//        ItemBlockRenderTypes.setRenderLayer(ENDER_BOTANY_POT.get(), RenderType.cutout());
     }
 
     private void registerRenderers(final EntityRenderersEvent.RegisterRenderers event) {

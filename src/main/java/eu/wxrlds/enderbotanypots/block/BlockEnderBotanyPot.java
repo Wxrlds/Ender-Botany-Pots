@@ -43,7 +43,6 @@ public class BlockEnderBotanyPot extends BlockBotanyPot {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        // Use our custom tick method
         return createTickerHelper(type, EnderBotanyPots.ENDER_BOTANY_POT_TILE.get(), BlockEntityEnderBotanyPot::tick);
     }
 
