@@ -1,21 +1,19 @@
 plugins {
-    id 'eclipse'
-    id 'idea'
+    id 'java-library'
     id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'net.neoforged.moddev' version '2.0.126'
+    id 'idea'
+}
+
+tasks.named('wrapper', Wrapper).configure {
+    distributionType = Wrapper.DistributionType.BIN
 }
 
 version = mod_version
 group = mod_group_id
 
-base {
-    archivesName = mod_id
-}
-
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-
 repositories {
-    // Jei, Cucumber, Botany Pots, Bookshelf, Ender Storage, Code Chicken Lib, The One Probe
+    // JEI, Botany Pots, Bookshelf, Ender Storage, Code Chicken Lib, The One Probe
     repositories {
         exclusiveContent {
             forRepository {
@@ -24,13 +22,12 @@ repositories {
                     url = "https://api.modrinth.com/maven"
                 }
             }
-            forRepositories(fg.repository)
             filter {
                 includeGroup "maven.modrinth"
             }
         }
     }
-    // Ender Storage, Code Chicken Lib
+    // Ender Storage
     maven {
         url = "https://maven.covers1624.net"
     }
@@ -40,115 +37,128 @@ repositories {
     }
 }
 
-println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
-minecraft {
-    mappings channel: mapping_channel, version: mapping_version
-    copyIdeResources = true
-    runs {
-        configureEach {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                }
-            }
-        }
+base {
+    archivesName = mod_id
+}
 
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+neoForge {
+    version = project.neo_version
+
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+
+    runs {
         client {
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
         server {
-            args '--nogui'
+            server()
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        gameTestServer {
+            type = "gameTestServer"
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
         data {
-            workingDirectory project.file('run-data')
-            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            data()
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
         }
     }
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
+}
+
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-
-    // JEI (to view recipes)
-    runtimeOnly fg.deobf("maven.modrinth:jei:ruHSy16N")
-    compileOnly fg.deobf("mezz.jei:jei-1.20.1-common-api:15.20.0.127")
-    compileOnly fg.deobf("mezz.jei:jei-1.20.1-forge-api:15.20.0.127")
-
-    // Cucumber Library (to view tags)
-    runtimeOnly fg.deobf("maven.modrinth:cucumber:xnLznSfT")
+    // JEI to view recipes
+    localRuntime "maven.modrinth:jei:ae5o0o24"
 
     // Botany Pots
-    runtimeOnly fg.deobf("maven.modrinth:botany-pots:9bH71LWw")
-    implementation fg.deobf("net.darkhax.botanypots:BotanyPots-Common-1.20.1:13.0.41")
-    implementation fg.deobf("net.darkhax.botanypots:BotanyPots-Forge-1.20.1:13.0.41")
+    localRuntime "maven.modrinth:botany-pots:66uZFLBG"
+    implementation "net.darkhax.botanypots:BotanyPots-Common-1.20.4:16.1.6"
+    implementation "net.darkhax.botanypots:BotanyPots-NeoForge-1.20.4:16.1.6"
     // Bookshelf dependency
-    runtimeOnly fg.deobf("maven.modrinth:bookshelf-lib:CBnLZwRS")
-    implementation fg.deobf("net.darkhax.bookshelf:Bookshelf-Forge-1.20.1:20.2.13")
-    implementation fg.deobf("net.darkhax.bookshelf:Bookshelf-Common-1.20.1:20.2.13")
+    localRuntime "maven.modrinth:bookshelf-lib:WheiIvOy"
+    implementation "net.darkhax.bookshelf:Bookshelf-Common-1.20.4:23.1.11"
+    implementation "net.darkhax.bookshelf:Bookshelf-NeoForge-1.20.4:23.1.11"
 
     // Ender Storage
-    runtimeOnly fg.deobf("maven.modrinth:ender-storage:pTEnM5jC")
-    implementation fg.deobf("io.codechicken:EnderStorage:1.20.1-2.11.0.188:universal")
-    // Code Chicken Lib dependency
-    runtimeOnly fg.deobf("maven.modrinth:codechicken-lib:pxajg7Ob")
-    implementation fg.deobf("io.codechicken:CodeChickenLib:1.20.1-4.4.0.516:universal")
+    localRuntime "maven.modrinth:ender-storage:DCf9s8BM"
+    implementation "io.codechicken:EnderStorage:1.20.4-2.12.0.189"
+    // // Code Chicken Lib dependency
+    localRuntime "maven.modrinth:codechicken-lib:4xAJvmwX"
+    implementation "io.codechicken:CodeChickenLib:1.20.4-4.5.0.517"
 
     // TOP (The one probe)
-    runtimeOnly fg.deobf("maven.modrinth:the-one-probe:r7iv0zP9")
-    compileOnly fg.deobf("maven.modrinth:the-one-probe:r7iv0zP9")
+    localRuntime "maven.modrinth:the-one-probe:APaGaSwq"
+    compileOnly "maven.modrinth:the-one-probe:APaGaSwq"
 }
 
-tasks.named('processResources', ProcessResources).configure {
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
     var replaceProperties = [
-            minecraft_version   : minecraft_version, minecraft_version_range: minecraft_version_range,
-            forge_version       : forge_version, forge_version_range: forge_version_range,
-            loader_version_range: loader_version_range,
-            mod_id              : mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
-            mod_authors         : mod_authors, mod_description: mod_description,
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+            mod_authors            : mod_authors,
+            mod_description        : mod_description
     ]
     inputs.properties replaceProperties
-
-    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
-        expand replaceProperties + [project: project]
-    }
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
 }
 
-tasks.named('jar', Jar).configure {
-    manifest {
-        attributes([
-                'Specification-Title'     : mod_id,
-                'Specification-Vendor'    : mod_authors,
-                'Specification-Version'   : '1',
-                'Implementation-Title'    : project.name,
-                'Implementation-Version'  : project.jar.archiveVersion,
-                'Implementation-Vendor'   : mod_authors,
-                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
-    }
-    finalizedBy 'reobfJar'
-}
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
 
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
-            artifact jar
+            from components.java
         }
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/mcmodsrepo"
+            url "file://${project.projectDir}/repo"
         }
     }
 }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
 }

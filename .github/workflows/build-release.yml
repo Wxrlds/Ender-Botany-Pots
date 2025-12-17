@@ -111,7 +111,7 @@ jobs:
           game-versions: |
             ${{ steps.get_mc_version.outputs.mc_version }}
           loaders: |
-            forge
+            neoforge
           version-type: ${{ steps.get_release_type.outputs.release_type }}
           version: ${{ steps.get_mc_version.outputs.mc_version }}-${{ steps.get_mod_version.outputs.mod_version }}
 

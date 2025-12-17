@@ -26,7 +26,7 @@ public class EnderBotanyPotsTOPPlugin implements Function<ITheOneProbe, Void>, I
 
     @Override
     public ResourceLocation getID() {
-        return ResourceLocation.fromNamespaceAndPath(EnderBotanyPots.MOD_ID, "top_plugin");
+        return new ResourceLocation(EnderBotanyPots.MOD_ID, "top_plugin");
     }
 
     @Override
@@ -36,17 +36,15 @@ public class EnderBotanyPotsTOPPlugin implements Function<ITheOneProbe, Void>, I
             if (tile instanceof BlockEntityEnderBotanyPot pot) {
                 Frequency freq = pot.getFrequency();
 
-                // Frequency Line
-                var freqText = Component.translatable("enderbotanypots.tooltip.frequency");
-                freqText.append(Component.literal(": "));
-                freqText.append(freq.getTooltip());
+                var freqText = Component.translatable("enderbotanypots.tooltip.frequency")
+                        .append(Component.literal(": "))
+                        .append(freq.getTooltip());
                 info.text(freqText);
 
-                // Owner Line
                 if (freq.hasOwner()) {
-                    var ownerText = Component.translatable("enderbotanypots.tooltip.owner");
-                    ownerText.append(Component.literal(": "));
-                    ownerText.append(freq.getOwnerName());
+                    var ownerText = Component.translatable("enderbotanypots.tooltip.owner")
+                            .append(Component.literal(": "))
+                            .append(freq.getOwnerName());
                     info.text(ownerText);
                 }
             }
