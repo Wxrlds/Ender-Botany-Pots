@@ -3,8 +3,8 @@ package eu.wxrlds.enderbotanypots.compat.top;
 
 import codechicken.enderstorage.api.Frequency;
 import eu.wxrlds.enderbotanypots.EnderBotanyPots;
-import eu.wxrlds.enderbotanypots.block.BlockEnderBotanyPot;
-import eu.wxrlds.enderbotanypots.block.BlockEntityEnderBotanyPot;
+import eu.wxrlds.enderbotanypots.block.EnderBotanyPotBlock;
+import eu.wxrlds.enderbotanypots.block.EnderBotanyPotBlockEntity;
 import mcjty.theoneprobe.api.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -26,14 +26,14 @@ public class EnderBotanyPotsTOPPlugin implements Function<ITheOneProbe, Void>, I
 
     @Override
     public ResourceLocation getID() {
-        return new ResourceLocation(EnderBotanyPots.MOD_ID, "top_plugin");
+        return ResourceLocation.fromNamespaceAndPath(EnderBotanyPots.MOD_ID, "top_plugin");
     }
 
     @Override
     public void addProbeInfo(ProbeMode mode, IProbeInfo info, Player player, Level level, BlockState state, IProbeHitData hit) {
-        if (state.getBlock() instanceof BlockEnderBotanyPot) {
+        if (state.getBlock() instanceof EnderBotanyPotBlock) {
             BlockEntity tile = level.getBlockEntity(hit.getPos());
-            if (tile instanceof BlockEntityEnderBotanyPot pot) {
+            if (tile instanceof EnderBotanyPotBlockEntity pot) {
                 Frequency freq = pot.getFrequency();
 
                 var freqText = Component.translatable("enderbotanypots.tooltip.frequency")
@@ -43,8 +43,8 @@ public class EnderBotanyPotsTOPPlugin implements Function<ITheOneProbe, Void>, I
 
                 if (freq.hasOwner()) {
                     var ownerText = Component.translatable("enderbotanypots.tooltip.owner")
-                            .append(Component.literal(": "))
-                            .append(freq.getOwnerName());
+                            .append(Component.literal(": "));
+                    freq.ownerName().ifPresent(ownerText::append);
                     info.text(ownerText);
                 }
             }

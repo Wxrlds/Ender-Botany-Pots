@@ -3,12 +3,12 @@ loaderVersion = "${loader_version_range}"
 license = "${mod_license}"
 issueTrackerURL = "https://github.com/Wxrlds/EnderBotanyPots"
 
-# Ender Botay Pots
+# Ender Botany Pots
 [[mods]]
 modId = "${mod_id}"
 version = "${mod_version}"
 displayName = "${mod_name}"
-displayURL = "https://github.com/Wxrlds/EnderBotanyPots" #optional
+displayURL = "https://github.com/Wxrlds/EnderBotanyPots"
 credits = "Darkhax for Botany Pots and covers1624 for Ender Storage"
 authors = "${mod_authors}"
 description = '''${mod_description}'''
@@ -33,13 +33,13 @@ side = "BOTH"
 [[dependencies.${ mod_id }]]
 modId = "botanypots"
 type = "required"
-versionRange = "[1.20.4-16,)"
+versionRange = "[1.21.1-21,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.${ mod_id }]]
 modId = "enderstorage"
 type = "required"
-versionRange = "[1.20.4-2.12,)"
+versionRange = "[1.21.1-2.13,)"
 ordering = "NONE"
 side = "BOTH"

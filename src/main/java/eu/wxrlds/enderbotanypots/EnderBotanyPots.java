@@ -1,11 +1,11 @@
 package eu.wxrlds.enderbotanypots;
 
 
-import eu.wxrlds.enderbotanypots.block.BlockEnderBotanyPot;
-import eu.wxrlds.enderbotanypots.block.BlockEntityEnderBotanyPot;
+import eu.wxrlds.enderbotanypots.block.EnderBotanyPotBlock;
+import eu.wxrlds.enderbotanypots.block.EnderBotanyPotBlockEntity;
 import eu.wxrlds.enderbotanypots.compat.top.EnderBotanyPotsTOPPlugin;
 import eu.wxrlds.enderbotanypots.recipe.EnderBotanyPotRecipe.EnderBotanyPotRecipe;
-import net.darkhax.botanypots.block.BotanyPotRenderer;
+import net.darkhax.botanypots.common.impl.block.BotanyPotRenderer;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
@@ -41,9 +41,9 @@ public class EnderBotanyPots {
     public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, MOD_ID);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MOD_ID);
 
-    public static final DeferredHolder<Block, BlockEnderBotanyPot> ENDER_BOTANY_POT = BLOCKS.register("ender_botany_pot", BlockEnderBotanyPot::new);
+    public static final DeferredHolder<Block, EnderBotanyPotBlock> ENDER_BOTANY_POT = BLOCKS.register("ender_botany_pot", EnderBotanyPotBlock::new);
     public static final DeferredHolder<Item, BlockItem> ENDER_BOTANY_POT_ITEM = ITEMS.register("ender_botany_pot", () -> new BlockItem(ENDER_BOTANY_POT.get(), new Item.Properties()));
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityEnderBotanyPot>> ENDER_BOTANY_POT_TILE = BLOCK_ENTITY.register("ender_botany_pot", () -> BlockEntityType.Builder.of(BlockEntityEnderBotanyPot::new, ENDER_BOTANY_POT.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderBotanyPotBlockEntity>> ENDER_BOTANY_POT_TILE = BLOCK_ENTITY.register("ender_botany_pot", () -> BlockEntityType.Builder.of(EnderBotanyPotBlockEntity::new, ENDER_BOTANY_POT.get()).build(null));
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderBotanyPotRecipe>> ENDER_BOTANY_POT_RECIPE = RECIPE_SERIALIZERS.register("crafting_enderbotanypot", EnderBotanyPotRecipe.Serializer::new);
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB = CREATIVE_TABS.register("enderbotanypots", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.enderbotanypots"))
@@ -72,7 +72,6 @@ public class EnderBotanyPots {
         LOGGER.info("Transfering Ender energy to Botany Pots");
     }
 
-
     private void registerRenderers(final EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(ENDER_BOTANY_POT_TILE.get(), BotanyPotRenderer::new);
     }
@@ -82,7 +81,6 @@ public class EnderBotanyPots {
             InterModComms.sendTo("theoneprobe", "getTheOneProbe", EnderBotanyPotsTOPPlugin::new);
         }
     }
-
 
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {

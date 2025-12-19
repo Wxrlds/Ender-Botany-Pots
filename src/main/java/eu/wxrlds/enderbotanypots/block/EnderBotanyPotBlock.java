@@ -4,46 +4,46 @@ package eu.wxrlds.enderbotanypots.block;
 import codechicken.enderstorage.api.Frequency;
 import eu.wxrlds.enderbotanypots.EnderBotanyPots;
 import eu.wxrlds.enderbotanypots.util.EnderBotanyPotHelper;
-import net.darkhax.botanypots.block.BlockBotanyPot;
+import net.darkhax.botanypots.common.impl.block.BotanyPotBlock;
+import net.darkhax.botanypots.common.impl.block.PotType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
+public class EnderBotanyPotBlock extends BotanyPotBlock {
 
-public class BlockEnderBotanyPot extends BlockBotanyPot {
-
-    public BlockEnderBotanyPot() {
-        // False since we don't want a hopper variant.
-        super(false);
+    public EnderBotanyPotBlock() {
+        // In 1.21.1 the pot has to be of type hopper, so that we can also require a harvest item
+        super(MapColor.COLOR_BLACK, PotType.HOPPER);
     }
 
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new BlockEntityEnderBotanyPot(pos, state);
+        return new EnderBotanyPotBlockEntity(pos, state);
     }
 
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return createTickerHelper(type, EnderBotanyPots.ENDER_BOTANY_POT_TILE.get(), BlockEntityEnderBotanyPot::tick);
+        return createTickerHelper(type, EnderBotanyPots.ENDER_BOTANY_POT_TILE.get(), EnderBotanyPotBlockEntity::tick);
     }
 
     // Places the block and uses the frequency of the items NBT
@@ -53,9 +53,8 @@ public class BlockEnderBotanyPot extends BlockBotanyPot {
         super.setPlacedBy(level, pos, state, placer, stack);
 
         BlockEntity tile = level.getBlockEntity(pos);
-        if (tile instanceof BlockEntityEnderBotanyPot pot && placer != null) {
+        if (tile instanceof EnderBotanyPotBlockEntity pot && placer != null) {
 
-            // We store the original frequency to later determine if the frequency changed and to send the chat message
             Frequency originalFreq = Frequency.readFromStack(stack);
             Frequency freqToSet = originalFreq;
             boolean copiedFromHand = false;
@@ -63,57 +62,51 @@ public class BlockEnderBotanyPot extends BlockBotanyPot {
             ItemStack mainHandStack = placer.getItemInHand(InteractionHand.MAIN_HAND);
             ItemStack offHandStack = placer.getItemInHand(InteractionHand.OFF_HAND);
 
-            // Copy the frequency of the off-hand item onto the botany pot
             if (mainHandStack.getItem() == this.asItem() && EnderBotanyPotHelper.isValidFrequencyItem(offHandStack)) {
                 freqToSet = Frequency.readFromStack(offHandStack);
                 copiedFromHand = true;
             }
 
-            // Apply the frequency to the new block
             pot.setFrequency(freqToSet);
 
-            // Notify the player that a new frequency has been set from the off-hand
             boolean isDifferent = !originalFreq.toString().equals(freqToSet.toString());
-            if (copiedFromHand && isDifferent && !level.isClientSide && placer instanceof Player) {
-                sendFrequencyMessage((Player) placer, freqToSet);
+            if (copiedFromHand && isDifferent && !level.isClientSide && placer instanceof Player player) {
+                sendFrequencyMessage(player, freqToSet);
             }
         }
     }
 
     // Right click interaction with other Ender Storage items
+    @NotNull
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        ItemStack stack = player.getItemInHand(hand);
-
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         // Only continues if the player is holding an Ender Pouch/Chest/Tank/Pot
         if (EnderBotanyPotHelper.isValidFrequencyItem(stack)) {
             BlockEntity tile = level.getBlockEntity(pos);
-            if (tile instanceof BlockEntityEnderBotanyPot pot) {
+            if (tile instanceof EnderBotanyPotBlockEntity pot) {
                 Frequency currentFreq = pot.getFrequency();
 
-                // Security Check: If the pot has an owner, only THAT owner can change it.
-                if (currentFreq.hasOwner() && !player.getUUID().equals(currentFreq.getOwner())) {
+                // If the pot has an owner, only THAT owner can change it
+                if (currentFreq.hasOwner() && !player.getUUID().equals(currentFreq.owner().orElse(null))) {
                     if (!level.isClientSide) {
                         player.sendSystemMessage(Component.translatable("enderbotanypots.chat.not_owner").withStyle(ChatFormatting.RED));
                     }
-                    return InteractionResult.FAIL;
+                    return ItemInteractionResult.FAIL;
                 }
 
                 Frequency newFreq = Frequency.readFromStack(stack);
 
-                // Only update the frequency, if it is actually different
                 if (!currentFreq.toString().equals(newFreq.toString())) {
                     if (!level.isClientSide) {
                         pot.setFrequency(newFreq);
                         sendFrequencyMessage(player, newFreq);
                     }
                 }
-
-                return InteractionResult.sidedSuccess(level.isClientSide);
+                return ItemInteractionResult.sidedSuccess(level.isClientSide);
             }
         }
 
-        return super.use(state, level, pos, player, hand, hit);
+        return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
     }
 
     // Helper to send a formatted chat message when the frequency changes
@@ -124,7 +117,7 @@ public class BlockEnderBotanyPot extends BlockBotanyPot {
 
         if (freq.hasOwner()) {
             msg.append(Component.literal(" ("));
-            msg.append(freq.getOwnerName());
+            freq.ownerName().ifPresent(msg::append);
             msg.append(Component.literal(")"));
         }
 
@@ -135,15 +128,12 @@ public class BlockEnderBotanyPot extends BlockBotanyPot {
     private static final Component TOOLTIP_NORMAL = Component.translatable("enderbotanypots.tooltip.enderpot").withStyle(ChatFormatting.GRAY);
 
     @Override
-    @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(ItemStack stack, @Nullable BlockGetter level, List<Component> tooltip, TooltipFlag flagIn) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
         tooltip.add(TOOLTIP_NORMAL);
 
         Frequency frequency = Frequency.readFromStack(stack);
-        if (frequency.hasOwner()) {
-            tooltip.add(frequency.getOwnerName());
-        }
-
+        frequency.ownerName().ifPresent(tooltip::add);
         tooltip.add(frequency.getTooltip());
+        super.appendHoverText(stack, context, tooltip, flagIn);
     }
 }

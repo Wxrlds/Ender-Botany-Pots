@@ -41,7 +41,7 @@ base {
     archivesName = mod_id
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 neoForge {
     version = project.neo_version
@@ -94,27 +94,27 @@ configurations {
 
 dependencies {
     // JEI to view recipes
-    localRuntime "maven.modrinth:jei:ae5o0o24"
+    localRuntime "maven.modrinth:jei:NMhqixRu"
+    compileOnly "mezz.jei:jei-1.21.1-common-api:19.25.1.332"
+    compileOnly "mezz.jei:jei-1.21.1-neoforge:19.25.1.332"
 
     // Botany Pots
-    localRuntime "maven.modrinth:botany-pots:66uZFLBG"
-    implementation "net.darkhax.botanypots:BotanyPots-Common-1.20.4:16.1.6"
-    implementation "net.darkhax.botanypots:BotanyPots-NeoForge-1.20.4:16.1.6"
+    localRuntime "maven.modrinth:botany-pots:DZU8FqKS"
+    implementation "net.darkhax.botanypots:botanypots-neoforge-1.21.1:21.1.41"
     // Bookshelf dependency
-    localRuntime "maven.modrinth:bookshelf-lib:WheiIvOy"
-    implementation "net.darkhax.bookshelf:Bookshelf-Common-1.20.4:23.1.11"
-    implementation "net.darkhax.bookshelf:Bookshelf-NeoForge-1.20.4:23.1.11"
+    localRuntime "maven.modrinth:bookshelf-lib:vQ3DXKc6"
+    implementation "net.darkhax.bookshelf:bookshelf-neoforge-1.21.1:21.1.80"
 
     // Ender Storage
-    localRuntime "maven.modrinth:ender-storage:DCf9s8BM"
-    implementation "io.codechicken:EnderStorage:1.20.4-2.12.0.189"
-    // // Code Chicken Lib dependency
-    localRuntime "maven.modrinth:codechicken-lib:4xAJvmwX"
-    implementation "io.codechicken:CodeChickenLib:1.20.4-4.5.0.517"
+    localRuntime "maven.modrinth:ender-storage:iDxzdaLT"
+    implementation "io.codechicken:EnderStorage:1.21.1-2.13.0.191"
+    // Code Chicken Lib dependency
+    localRuntime "maven.modrinth:codechicken-lib:gQ1srSKh"
+    implementation "io.codechicken:CodeChickenLib:1.21.1-4.6.1.526"
 
     // TOP (The one probe)
-    localRuntime "maven.modrinth:the-one-probe:APaGaSwq"
-    compileOnly "maven.modrinth:the-one-probe:APaGaSwq"
+    localRuntime "maven.modrinth:the-one-probe:4bbMy0Mh"
+    compileOnly "maven.modrinth:the-one-probe:4bbMy0Mh"
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
