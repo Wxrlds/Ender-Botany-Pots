@@ -22,10 +22,13 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class EnderBotanyPotBlock extends BotanyPotBlock {
@@ -74,6 +77,23 @@ public class EnderBotanyPotBlock extends BotanyPotBlock {
                 sendFrequencyMessage(player, freqToSet);
             }
         }
+    }
+
+    // We need to override getDrops, instead of using Loot Tables, due to changes
+    // in Vanilla behaviour which no longer makes Loot Tables a feasible method
+    @Override
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
+        List<ItemStack> drops = new ArrayList<>();
+        BlockEntity tile = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
+
+        ItemStack stack = new ItemStack(this);
+
+        if (tile instanceof EnderBotanyPotBlockEntity pot) {
+            pot.getFrequency().writeToStack(stack);
+        }
+
+        drops.add(stack);
+        return drops;
     }
 
     // Right click interaction with other Ender Storage items
