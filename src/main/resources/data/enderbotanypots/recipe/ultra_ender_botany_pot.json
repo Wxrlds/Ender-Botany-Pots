@@ -1,0 +1,23 @@
+{
+    "type": "enderbotanypots:crafting_enderbotanypot",
+    "group": "enderbotanypots",
+    "category": "misc",
+    "ingredients": [
+        {
+            "item": "enderbotanypots:elite_ender_botany_pot"
+        },
+        {
+            "tag": "c:storage_blocks/diamond"
+        },
+        {
+            "tag": "c:storage_blocks/diamond"
+        },
+        {
+            "tag": "c:nether_stars"
+        }
+    ],
+    "result": {
+        "id": "enderbotanypots:ultra_ender_botany_pot",
+        "count": 1
+    }
+}

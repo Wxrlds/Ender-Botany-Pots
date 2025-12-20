@@ -1,0 +1,23 @@
+{
+    "type": "enderbotanypots:crafting_enderbotanypot",
+    "group": "enderbotanypots",
+    "category": "misc",
+    "ingredients": [
+        {
+            "item": "enderbotanypots:ultra_ender_botany_pot"
+        },
+        {
+            "tag": "c:storage_blocks/netherite"
+        },
+        {
+            "tag": "c:storage_blocks/netherite"
+        },
+        {
+            "item": "minecraft:enchanted_golden_apple"
+        }
+    ],
+    "result": {
+        "id": "enderbotanypots:mega_ender_botany_pot",
+        "count": 1
+    }
+}

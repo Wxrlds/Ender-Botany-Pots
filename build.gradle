@@ -115,6 +115,10 @@ dependencies {
     // TOP (The one probe)
     localRuntime "maven.modrinth:the-one-probe:4bbMy0Mh"
     compileOnly "maven.modrinth:the-one-probe:4bbMy0Mh"
+
+    // Botany Pots Tiers
+    localRuntime "maven.modrinth:botany-pots-tiers:9jLH4F79"
+    compileOnly "maven.modrinth:botany-pots-tiers:9jLH4F79"
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {

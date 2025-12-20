@@ -1,0 +1,17 @@
+{
+    "type": "enderbotanypots:crafting_enderbotanypot",
+    "group": "enderbotanypots",
+    "category": "misc",
+    "ingredients": [
+        {
+            "item": "enderbotanypots:ender_botany_pot"
+        },
+        {
+            "tag": "botanypotstiers:elite_hopper_botany_pots"
+        }
+    ],
+    "result": {
+        "id": "enderbotanypots:elite_ender_botany_pot",
+        "count": 1
+    }
+}
