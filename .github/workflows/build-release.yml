@@ -75,7 +75,7 @@ jobs:
           echo "Current tag: $CURRENT_TAG"
           
           # All tags in current branch, without the current one
-          TAG_LIST=$(git tag --merged HEAD --sort=-creatordate | grep -E '^alpha/v|^beta/v|^release/v' | grep -v "$CURRENT_TAG")
+          TAG_LIST=$(git tag --merged HEAD --sort=-creatordate | grep -E '^alpha/v|^beta/v|^release/v' | grep -v "$CURRENT_TAG" || true)
           echo "Tag list: $TAG_LIST"
           
           LAST_TAG=$(echo "$TAG_LIST" | sed -n 1p)
@@ -83,13 +83,13 @@ jobs:
           
           if [ -z "$LAST_TAG" ]; then
               # If there is no previous commit
-              GIT_LOG_RANGE=""
+              GIT_LOG_RANGE="$CURRENT_TAG"
           else
               GIT_LOG_RANGE="$LAST_TAG..$CURRENT_TAG"
           fi
           echo "Git log range: $GIT_LOG_RANGE"
           
-          CHANGELOG=$(git log $GIT_LOG_RANGE --pretty=format:'[%s](https://'$REPO'/commit/%H) - %an<br>')
+          CHANGELOG=$(git log "$GIT_LOG_RANGE" --pretty=format:'[%s](https://'$REPO'/commit/%H) - %an<br>')
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
           echo "$CHANGELOG" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
