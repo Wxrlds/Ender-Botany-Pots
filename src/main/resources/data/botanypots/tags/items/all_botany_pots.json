@@ -2,8 +2,17 @@
     "replace": false,
     "values": [
         "enderbotanypots:ender_botany_pot",
-        "enderbotanypots:elite_ender_botany_pot",
-        "enderbotanypots:ultra_ender_botany_pot",
-        "enderbotanypots:creative_ender_botany_pot"
+        {
+            "id": "enderbotanypots:elite_ender_botany_pot",
+            "required": false
+        },
+        {
+            "id": "enderbotanypots:ultra_ender_botany_pot",
+            "required": false
+        },
+        {
+            "id": "enderbotanypots:creative_ender_botany_pot",
+            "required": false
+        }
     ]
 }
