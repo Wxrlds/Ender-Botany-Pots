@@ -37,6 +37,14 @@ versionRange = "[1.20.1-13,)"
 ordering = "NONE"
 side = "BOTH"
 
+# Botany Pots Tiers
+[[dependencies.${ mod_id }]]
+modId = "botanypotstiers"
+mandatory = true
+versionRange = "[6,)"
+ordering = "NONE"
+side = "BOTH"
+
 # Ender Storage
 [[dependencies.${ mod_id }]]
 modId = "enderstorage"

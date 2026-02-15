@@ -104,6 +104,10 @@ dependencies {
     // TOP (The one probe)
     runtimeOnly fg.deobf("maven.modrinth:the-one-probe:r7iv0zP9")
     compileOnly fg.deobf("maven.modrinth:the-one-probe:r7iv0zP9")
+
+    // Botany Pots Tiers
+    runtimeOnly fg.deobf("maven.modrinth:botany-pots-tiers:3yo9bQAH")
+    compileOnly fg.deobf("maven.modrinth:botany-pots-tiers:3yo9bQAH")
 }
 
 tasks.named('processResources', ProcessResources).configure {

@@ -1,0 +1,9 @@
+{
+    "parent": "botanypotstiers:block/botany_pot_base",
+    "render_type": "minecraft:cutout",
+    "textures": {
+        "terracotta": "minecraft:block/obsidian",
+        "stripe": "botanypotstiers:block/ultra",
+        "particle": "minecraft:block/obsidian"
+    }
+}

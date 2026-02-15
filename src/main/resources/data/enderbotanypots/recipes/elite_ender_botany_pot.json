@@ -1,0 +1,21 @@
+{
+    "type": "enderbotanypots:crafting_enderbotanypot",
+    "group": "enderbotanypots",
+    "ingredients": [
+        {
+            "item": "enderbotanypots:ender_botany_pot"
+        },
+        {
+            "tag": "forge:storage_blocks/iron"
+        },
+        {
+            "tag": "forge:storage_blocks/iron"
+        },
+        {
+            "tag": "forge:ender_pearls"
+        }
+    ],
+    "result": {
+        "item": "enderbotanypots:elite_ender_botany_pot"
+    }
+}

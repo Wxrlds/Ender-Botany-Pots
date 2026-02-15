@@ -3,6 +3,9 @@ package eu.wxrlds.enderbotanypots;
 
 import eu.wxrlds.enderbotanypots.block.BlockEnderBotanyPot;
 import eu.wxrlds.enderbotanypots.block.BlockEntityEnderBotanyPot;
+import eu.wxrlds.enderbotanypots.compat.botanypotstiers.BlockEntityTieredEnderBotanyPot;
+import eu.wxrlds.enderbotanypots.compat.botanypotstiers.BlockTieredEnderBotanyPot;
+import eu.wxrlds.enderbotanypots.compat.botanypotstiers.BotanyPotsTiersCompat;
 import eu.wxrlds.enderbotanypots.compat.top.EnderBotanyPotsTOPPlugin;
 import eu.wxrlds.enderbotanypots.recipe.EnderBotanyPotRecipe.EnderBotanyPotRecipe;
 import net.darkhax.botanypots.block.BotanyPotRenderer;
@@ -13,6 +16,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.client.event.EntityRenderersEvent;
@@ -31,6 +35,9 @@ import net.minecraftforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Mod(EnderBotanyPots.MOD_ID)
 public class EnderBotanyPots {
     public static final String MOD_ID = "enderbotanypots";
@@ -45,24 +52,50 @@ public class EnderBotanyPots {
 
     public static final RegistryObject<Block> ENDER_BOTANY_POT = BLOCKS.register("ender_botany_pot", BlockEnderBotanyPot::new);
     public static final RegistryObject<Item> ENDER_BOTANY_POT_ITEM = ITEMS.register("ender_botany_pot", () -> new BlockItem(ENDER_BOTANY_POT.get(), new Item.Properties()));
-    public static final RegistryObject<BlockEntityType<BlockEntityEnderBotanyPot>> ENDER_BOTANY_POT_TILE = BLOCK_ENTITY.register("ender_botany_pot", () -> BlockEntityType.Builder.of(BlockEntityEnderBotanyPot::new, ENDER_BOTANY_POT.get()).build(null));
+    public static final RegistryObject<BlockEntityType<BlockEntityEnderBotanyPot>> ENDER_BOTANY_POT_TILE = BLOCK_ENTITY.register("ender_botany_pot", () -> {
+        List<Block> validBlocks = new ArrayList<>();
+        validBlocks.add(ENDER_BOTANY_POT.get());
+        if (ModList.get().isLoaded("botanypotstiers")) {
+            validBlocks.addAll(BotanyPotsTiersCompat.getTieredPots());
+        }
+
+        return BlockEntityType.Builder.of((pos, state) -> {
+            if (state.getBlock() instanceof BlockTieredEnderBotanyPot tieredBlock) {
+                return new BlockEntityTieredEnderBotanyPot(tieredBlock.tier, pos, state);
+            }
+            return new BlockEntityEnderBotanyPot(pos, state);
+        }, validBlocks.toArray(new Block[0])).build(null);
+    });
+
     public static final RegistryObject<RecipeSerializer<?>> ENDER_BOTANY_POT_RECIPE = RECIPE_SERIALIZERS.register("crafting_enderbotanypot", EnderBotanyPotRecipe.Serializer::new);
     public static final RegistryObject<CreativeModeTab> TAB = CREATIVE_TABS.register("enderbotanypots", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.enderbotanypots"))
             .icon(() -> new ItemStack(ENDER_BOTANY_POT.get()))
-            .displayItems((params, output) -> output.accept(ENDER_BOTANY_POT.get()))
+            .displayItems((params, output) -> {
+                output.accept(ENDER_BOTANY_POT.get());
+                if (ModList.get().isLoaded("botanypotstiers")) {
+                    for (ItemLike stack : BotanyPotsTiersCompat.getTabItems()) {
+                        output.accept(stack);
+                    }
+                }
+            })
             .build());
 
 
     public EnderBotanyPots(FMLJavaModLoadingContext context) {
         IEventBus eventBus = context.getModEventBus();
 
-        // Register mod content
+        // Register base mod content
         BLOCKS.register(eventBus);
         ITEMS.register(eventBus);
         BLOCK_ENTITY.register(eventBus);
         RECIPE_SERIALIZERS.register(eventBus);
         CREATIVE_TABS.register(eventBus);
+
+        // Register Botany Pots Tiers items
+        if (ModList.get().isLoaded("botanypotstiers")) {
+            BotanyPotsTiersCompat.init(eventBus);
+        }
 
         eventBus.addListener(this::setup);
         eventBus.addListener(this::enqueueIMC);

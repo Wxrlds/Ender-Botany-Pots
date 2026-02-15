@@ -114,7 +114,7 @@ public class BlockEntityEnderBotanyPot extends BlockEntityBotanyPot {
         // We need to overwrite it since the auto-harvest
         // logic is tied to the pot being a hopper
         if (!level.isClientSide && pot.areGrowthConditionsMet() && pot.isCropHarvestable()) {
-            pot.attemptEnderHarvest();
+            pot.attemptEnderHarvest(1);
         }
     }
 
@@ -129,7 +129,7 @@ public class BlockEntityEnderBotanyPot extends BlockEntityBotanyPot {
 
 
     // Attempts to harvest the crop and send it to Ender Storage
-    private void attemptEnderHarvest() {
+    public void attemptEnderHarvest(int dropMultiplier) {
         // Get the Ender Storage inventory for the current frequency
         EnderItemStorage storage = EnderStorageManager.instance(false).getStorage(frequency, EnderItemStorage.TYPE);
         if (storage == null) return;
@@ -144,11 +144,12 @@ public class BlockEntityEnderBotanyPot extends BlockEntityBotanyPot {
         // Wrap the EnderStorage in an IItemHandler for easy insertion
         IItemHandler itemHandler = new InvWrapper(storage);
 
-        for (ItemStack stack : drops) {
-            ItemStack remaining = ItemHandlerHelper.insertItemStacked(itemHandler, stack, false);
+        for (ItemStack drop : drops) {
+            drop.setCount(drop.getCount() * dropMultiplier);
+            ItemStack remaining = ItemHandlerHelper.insertItemStacked(itemHandler, drop, false);
 
             // If we managed to insert anything, we successfully harvested
-            if (remaining.getCount() < stack.getCount()) {
+            if (remaining.getCount() < drop.getCount()) {
                 didHarvest = true;
             }
         }

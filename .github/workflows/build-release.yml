@@ -129,9 +129,11 @@ jobs:
             ender-storage-1-8(required)
             the-one-probe(optional)
             jei(optional)
+             botany-pots-tiers(optional)
 
           modrinth-dependencies: |
             botany-pots(required)
             ender-storage(required)
             the-one-probe(optional)
             jei(optional)
+            botany-pots-tiers(optional)

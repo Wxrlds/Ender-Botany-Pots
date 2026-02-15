@@ -1,6 +1,9 @@
 {
     "enderbotanypots.tooltip.enderpot": "A small pot for growing many kinds of plants. Automatically places output in the Ender Chest",
     "block.enderbotanypots.ender_botany_pot": "Ender Botany Pot",
+    "block.enderbotanypots.elite_ender_botany_pot": "Elite Ender Botany Pot",
+    "block.enderbotanypots.ultra_ender_botany_pot": "Ultra Ender Botany Pot",
+    "block.enderbotanypots.creative_ender_botany_pot": "Creative Ender Botany Pot",
     "itemGroup.enderbotanypots": "Ender Botany Pots",
     "enderbotanypots.tooltip.frequency": "Frequency",
     "enderbotanypots.jei.description": "Change the frequency of the Pot, by right-click it with an Ender Chest, Ender Tank, Ender Pouch, or another Ender Botany Pot.\\n\\nAlternatively, hold one of these in your off-hand while placing the Pot to apply its frequency to the placed Pot.",

@@ -2,6 +2,7 @@ package eu.wxrlds.enderbotanypots.compat.jei;
 
 
 import eu.wxrlds.enderbotanypots.EnderBotanyPots;
+import eu.wxrlds.enderbotanypots.compat.botanypotstiers.BotanyPotsTiersCompat;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
@@ -11,6 +12,8 @@ import net.darkhax.botanypots.addons.jei.JEIPlugin;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ItemLike;
+import net.minecraftforge.fml.ModList;
 
 @JeiPlugin
 public class EnderBotanyPotsJEIPlugin implements IModPlugin {
@@ -26,6 +29,13 @@ public class EnderBotanyPotsJEIPlugin implements IModPlugin {
                 new ItemStack(EnderBotanyPots.ENDER_BOTANY_POT.get()),
                 JEIPlugin.CROP
         );
+        if (ModList.get().isLoaded("botanypotstiers")) {
+            for (ItemLike pot : BotanyPotsTiersCompat.getTabItems()) {
+                registration.addRecipeCatalyst(
+                        new ItemStack(pot), JEIPlugin.CROP
+                );
+            }
+        }
     }
 
     @Override
