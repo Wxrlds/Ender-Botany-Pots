@@ -1,0 +1,9 @@
+{
+    "replace": false,
+    "values": [
+        "enderbotanypots:ender_botany_pot",
+        "enderbotanypots:elite_ender_botany_pot",
+        "enderbotanypots:ultra_ender_botany_pot",
+        "enderbotanypots:creative_ender_botany_pot"
+    ]
+}
