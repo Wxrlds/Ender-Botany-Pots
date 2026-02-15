@@ -78,21 +78,21 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     // JEI (to view recipes)
-    runtimeOnly fg.deobf("maven.modrinth:jei:ruHSy16N")
-    compileOnly fg.deobf("mezz.jei:jei-1.20.1-common-api:15.20.0.127")
-    compileOnly fg.deobf("mezz.jei:jei-1.20.1-forge-api:15.20.0.127")
+    runtimeOnly fg.deobf("maven.modrinth:jei:p7yZWpEg")
+    compileOnly fg.deobf("mezz.jei:jei-1.20.1-common-api:15.20.0.129")
+    compileOnly fg.deobf("mezz.jei:jei-1.20.1-forge-api:15.20.0.129")
 
     // Cucumber Library (to view tags)
     runtimeOnly fg.deobf("maven.modrinth:cucumber:xnLznSfT")
 
     // Botany Pots
-    runtimeOnly fg.deobf("maven.modrinth:botany-pots:9bH71LWw")
-    implementation fg.deobf("net.darkhax.botanypots:BotanyPots-Common-1.20.1:13.0.41")
-    implementation fg.deobf("net.darkhax.botanypots:BotanyPots-Forge-1.20.1:13.0.41")
+    runtimeOnly fg.deobf("maven.modrinth:botany-pots:GHNPFUnp")
+    implementation fg.deobf("net.darkhax.botanypots:BotanyPots-Common-1.20.1:13.0.43")
+    implementation fg.deobf("net.darkhax.botanypots:BotanyPots-Forge-1.20.1:13.0.43")
     // Bookshelf dependency
-    runtimeOnly fg.deobf("maven.modrinth:bookshelf-lib:CBnLZwRS")
-    implementation fg.deobf("net.darkhax.bookshelf:Bookshelf-Forge-1.20.1:20.2.13")
-    implementation fg.deobf("net.darkhax.bookshelf:Bookshelf-Common-1.20.1:20.2.13")
+    runtimeOnly fg.deobf("maven.modrinth:bookshelf-lib:7eS5OIHj")
+    implementation fg.deobf("net.darkhax.bookshelf:Bookshelf-Forge-1.20.1:20.2.15")
+    implementation fg.deobf("net.darkhax.bookshelf:Bookshelf-Common-1.20.1:20.2.15")
 
     // Ender Storage
     runtimeOnly fg.deobf("maven.modrinth:ender-storage:pTEnM5jC")
