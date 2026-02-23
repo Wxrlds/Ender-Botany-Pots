@@ -1,4 +1,10 @@
 {
+    "neoforge:conditions": [
+        {
+            "type": "neoforge:mod_loaded",
+            "modid": "botanypotstiers"
+        }
+    ],
     "type": "enderbotanypots:crafting_enderbotanypot",
     "group": "enderbotanypots",
     "category": "misc",
