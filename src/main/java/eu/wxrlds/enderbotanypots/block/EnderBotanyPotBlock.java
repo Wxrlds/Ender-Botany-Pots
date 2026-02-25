@@ -116,7 +116,7 @@ public class EnderBotanyPotBlock extends BotanyPotBlock {
 
                 Frequency newFreq = Frequency.readFromStack(stack);
 
-                if (!currentFreq.toString().equals(newFreq.toString())) {
+                if (!currentFreq.equals(newFreq)) {
                     if (!level.isClientSide) {
                         pot.setFrequency(newFreq);
                         sendFrequencyMessage(player, newFreq);
