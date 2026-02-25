@@ -36,86 +36,11 @@ public class EnderBotanyPotBlockEntity extends BotanyPotBlockEntity {
 
     private Frequency frequency = new Frequency();
     private int bonemealCooldown = 0;
+    private EnderItemStorage cachedEnderStorage;
 
     public EnderBotanyPotBlockEntity(BlockPos pos, BlockState state) {
         super((Supplier) EnderBotanyPots.ENDER_BOTANY_POT_TILE, pos, state);
     }
-
-    @Override
-    public BlockEntityType<?> getType() {
-        return EnderBotanyPots.ENDER_BOTANY_POT_TILE.get();
-    }
-
-    public Frequency getFrequency() {
-        return frequency;
-    }
-
-    @Override
-    public void setBonemealCooldown(int cooldown) {
-        // Update parent to keep internal consistency if possible
-        super.setBonemealCooldown(cooldown);
-        // Update our local shadow
-        this.bonemealCooldown = cooldown;
-    }
-
-    @Override
-    public boolean canBonemeal() {
-        return this.bonemealCooldown <= 0;
-    }
-
-    // Sets the frequency
-    public void setFrequency(Frequency frequency) {
-        this.frequency = frequency;
-        this.setChanged();
-        if (this.level != null) {
-            // And sends that information to the client
-            this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 3);
-        }
-    }
-
-    @Override
-    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        if (tag.contains("Frequency")) {
-            this.frequency = Frequency.CODEC.parse(NbtOps.INSTANCE, tag.get("Frequency")).result().orElse(new Frequency());
-        }
-        if (tag.contains("bonemeal_cooldown")) {
-            this.bonemealCooldown = tag.getInt("bonemeal_cooldown");
-        }
-    }
-
-    @Override
-    public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        Frequency.CODEC.encodeStart(NbtOps.INSTANCE, frequency)
-                .resultOrPartial(err -> {
-                })
-                .ifPresent(freqTag -> tag.put("Frequency", freqTag));
-    }
-
-    @Override
-    public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return ClientboundBlockEntityDataPacket.create(this);
-    }
-
-    @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        CompoundTag tag = super.getUpdateTag(registries);
-        saveAdditional(tag, registries);
-        return tag;
-    }
-
-    // What happens when receiving a packet
-    // We need this for HWYLA/Jade to show the correct owner after changing the frequency
-    // TOP is running server side so this is not needed
-    @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider) {
-        super.onDataPacket(net, pkt, lookupProvider);
-        if (pkt.getTag() != null) {
-            this.loadAdditional(pkt.getTag(), lookupProvider);
-        }
-    }
-
 
     // Main growth logic
     // Copied from BotanyPotBlockEntity#tickPot
@@ -183,8 +108,10 @@ public class EnderBotanyPotBlockEntity extends BotanyPotBlockEntity {
             if (pot.exportCooldown.getTicks() <= 0) {
                 if (level instanceof ServerLevel) {
                     // Try to export to Ender Storage
-                    EnderItemStorage storage = EnderStorageManager.instance(false).getStorage(pot.frequency, EnderItemStorage.TYPE);
-                    IItemHandler enderHandler = new InvWrapper(storage);
+                    if (pot.cachedEnderStorage == null) {
+                        pot.cachedEnderStorage = EnderStorageManager.instance(false).getStorage(pot.frequency, EnderItemStorage.TYPE);
+                    }
+                    IItemHandler enderHandler = new InvWrapper(pot.cachedEnderStorage);
                     boolean inventoryChanged = false;
 
                     for (int slot : BotanyPotBlockEntity.STORAGE_SLOTS) {
@@ -205,6 +132,81 @@ public class EnderBotanyPotBlockEntity extends BotanyPotBlockEntity {
                 }
                 pot.exportCooldown.reset();
             }
+        }
+    }
+
+    @Override
+    public BlockEntityType<?> getType() {
+        return EnderBotanyPots.ENDER_BOTANY_POT_TILE.get();
+    }
+
+    public Frequency getFrequency() {
+        return frequency;
+    }
+
+    // Sets the frequency
+    public void setFrequency(Frequency frequency) {
+        this.frequency = frequency;
+        this.setChanged();
+        // Invalidate cache when it changes
+        this.cachedEnderStorage = null;
+        if (this.level != null) {
+            // And sends that information to the client
+            this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 3);
+        }
+    }
+
+    @Override
+    public void setBonemealCooldown(int cooldown) {
+        // Update parent to keep internal consistency if possible
+        super.setBonemealCooldown(cooldown);
+        // Update our local shadow
+        this.bonemealCooldown = cooldown;
+    }
+
+    @Override
+    public boolean canBonemeal() {
+        return this.bonemealCooldown <= 0;
+    }
+
+    @Override
+    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        if (tag.contains("Frequency")) {
+            this.frequency = Frequency.CODEC.parse(NbtOps.INSTANCE, tag.get("Frequency")).result().orElse(new Frequency());
+        }
+        if (tag.contains("bonemeal_cooldown")) {
+            this.bonemealCooldown = tag.getInt("bonemeal_cooldown");
+        }
+    }
+
+    @Override
+    public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
+        Frequency.CODEC.encodeStart(NbtOps.INSTANCE, frequency).resultOrPartial(err -> {
+        }).ifPresent(freqTag -> tag.put("Frequency", freqTag));
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = super.getUpdateTag(registries);
+        saveAdditional(tag, registries);
+        return tag;
+    }
+
+    // What happens when receiving a packet
+    // We need this for HWYLA/Jade to show the correct owner after changing the frequency
+    // TOP is running server side so this is not needed
+    @Override
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider) {
+        super.onDataPacket(net, pkt, lookupProvider);
+        if (pkt.getTag() != null) {
+            this.loadAdditional(pkt.getTag(), lookupProvider);
         }
     }
 }
