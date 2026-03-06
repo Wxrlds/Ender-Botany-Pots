@@ -42,7 +42,7 @@ jobs:
           echo "branch=${ref////-}" >> $GITHUB_OUTPUT
 
       - name: "Upload artifacts"
-        uses: "actions/upload-artifact@v6"
+        uses: "actions/upload-artifact@v7"
         with:
           name: "${{ steps.info.outputs.mod_id }}-artifacts-${{ steps.get_branch.outputs.branch }}-${{ github.run_number }}"
           path: build/libs/*.jar
