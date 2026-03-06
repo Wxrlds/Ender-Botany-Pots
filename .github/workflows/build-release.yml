@@ -1,135 +1,87 @@
-# Used when a release is pushed to GitHub
-# This does not make use of any caching as to ensure a clean build
-# https://github.com/CaffeineMC/sodium/blob/dc7dc4c634316ac8b510d2dc8290079ebc462778/.github/workflows/build-release.yml
-# https://github.com/klikli-dev/occultism/blob/4e98f6753d61403d5efcb87368d63bd7c793d2e5/.github/workflows/build_and_publish.yaml
-# https://github.com/Kira-NT/mc-publish
-# https://wiki.fabricmc.net/tutorial:publishing_mods_using_github_actions
-
-name: build-release
+name: "build-release"
 
 on:
   push:
     tags:
-      - 'alpha/v**'
-      - 'beta/v**'
-      - 'release/v**'
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Tag to build from'
-        required: true
+      - "alpha/v**"
+      - "beta/v**"
+      - "release/v**"
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  release:
+    runs-on: "ubuntu-latest"
+
+    permissions:
+      contents: "write"
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: "Checkout repository"
+        uses: "actions/checkout@v6"
         with:
           fetch-depth: 0
 
-      - name: Validate Gradle Wrapper
-        uses: gradle/actions/wrapper-validation@v3
+      - name: "Get mod info"
+        id: "info"
+        shell: bash
+        run: |
+          chmod +x .github/scripts/get_mod_info.sh
+          .github/scripts/get_mod_info.sh
 
-      - name: Setup JDK 17
-        uses: actions/setup-java@v4
+      # This makes sure that when there is a tag push, the version in gradle.properties has been increased
+      - name: "Validate version bump on tag"
+        run: |
+          CUR_VER=${{ steps.info.outputs.mod_version }}
+          PREV_VER=${{ steps.info.outputs.previous_mod_version }}
+          if [ "$PREV_VER" != "none" ] && [ "$CUR_VER" == "$PREV_VER" ]; then
+            TAG_NAME=${GITHUB_REF#refs/tags/}
+            echo "::error::VERSION in gradle.properties NOT UPDATED!"
+            echo "::error::Expected version bump in gradle.properties but received $CUR_VER (same as in tag ${{ steps.info.outputs.previous_tag }})."
+            echo "::error::Deleting tag '$TAG_NAME' and failing build..."
+
+            # Delete the tag from the remote
+            git push origin ":refs/tags/$TAG_NAME"
+            exit 1
+          fi
+
+      - name: "Setup JDK ${{ steps.info.outputs.java_version }}"
+        uses: "actions/setup-java@v5"
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "${{ steps.info.outputs.java_version }}"
+          distribution: "temurin"
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - name: "Setup Gradle"
+        uses: "gradle/actions/setup-gradle@v4"
         with:
           cache-read-only: true
 
-      - name: Build with Gradle
-        run: ./gradlew build
-
-      - name: Get release type from Tag
-        id: get_release_type
+      - name: "Build with Gradle"
         run: |
-          TAG_REF="${GITHUB_REF#refs/tags/}"
-          RELEASE_TYPE=$(echo "$TAG_REF" | cut -d '/' -f 1)
-          echo "release_type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
+          ./gradlew build
 
-      - name: Get mc version from tag
-        id: get_mc_version
-        run: |
-          TAG_REF="${GITHUB_REF#refs/tags/}"
-          RELEASE_TYPE=$(echo "$TAG_REF" | cut -d '/' -f 2 | cut -d '-' -f 1)
-          echo "mc_version=$RELEASE_TYPE" >> $GITHUB_OUTPUT
-
-      - name: Get version from tag
-        id: get_mod_version
-        run: |
-          TAG_REF="${GITHUB_REF#refs/tags/}"
-          RELEASE_TYPE=$(echo "$TAG_REF" | cut -d '/' -f 2 | cut -d '-' -f 2)
-          echo "mod_version=$RELEASE_TYPE" >> $GITHUB_OUTPUT
-
-      - name: Build changelog
-        id: get_changelog
-        run: |
-          REPO="github.com/${{ github.repository }}"
-          CURRENT_TAG="${GITHUB_REF#refs/tags/}"
-          echo "Current tag: $CURRENT_TAG"
-          
-          # All tags in current branch, without the current one
-          TAG_LIST=$(git tag --merged HEAD --sort=-creatordate | grep -E '^alpha/v|^beta/v|^release/v' | grep -v "$CURRENT_TAG" || true)
-          echo "Tag list: $TAG_LIST"
-          
-          LAST_TAG=$(echo "$TAG_LIST" | sed -n 1p)
-          echo "Last tag: $LAST_TAG"
-          
-          if [ -z "$LAST_TAG" ]; then
-              # If there is no previous commit
-              GIT_LOG_RANGE="$CURRENT_TAG"
-          else
-              GIT_LOG_RANGE="$LAST_TAG..$CURRENT_TAG"
-          fi
-          echo "Git log range: $GIT_LOG_RANGE"
-          
-          CHANGELOG=$(git log "$GIT_LOG_RANGE" --pretty=format:'[%s](https://'$REPO'/commit/%H) - %an<br>')
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGELOG" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          
-          echo "Release type is: ${{ steps.get_release_type.outputs.release_type }}"
-          echo "MC version is: ${{ steps.get_mc_version.outputs.mc_version }}"
-          echo "Mod version is: ${{ steps.get_mod_version.outputs.mod_version }}"
-
-      - name: Upload to Modrinth & Curseforge
+      - name: "Upload to Modrinth"
+        if: ${{ vars.MR_PROJECT_ID != '' }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
-          modrinth-id: 6PDQbwAY
-          modrinth-token: ${{ secrets.MODRINTH_API_TOKEN }}
+          modrinth-id: ${{ vars.MR_PROJECT_ID }}
+          modrinth-token: ${{ secrets.MR_PROJECT_API_TOKEN }}
 
-          curseforge-id: 1405461
-          curseforge-token: ${{ secrets.CURSEFORGE_API_TOKEN }}
-
-          name: enderbotanypots-${{ steps.get_mc_version.outputs.mc_version }}-${{ steps.get_mod_version.outputs.mod_version }}
+          name: ${{ steps.info.outputs.mod_name }}-${{ steps.info.outputs.mod_version }}
           game-versions: |
-            ${{ steps.get_mc_version.outputs.mc_version }}
+            ${{ steps.info.outputs.minecraft_version }}
           loaders: |
-            forge
-          version-type: ${{ steps.get_release_type.outputs.release_type }}
-          version: ${{ steps.get_mc_version.outputs.mc_version }}-${{ steps.get_mod_version.outputs.mod_version }}
+            ${{ steps.info.outputs.mod_loader }}
+          version-type: ${{ steps.info.outputs.mod_release_type }}
+          version: ${{ steps.info.outputs.mod_version }}
+          modrinth-files: build/libs/*.jar
 
           changelog: |
-            ${{ steps.get_mc_version.outputs.mc_version }}-${{ steps.get_mod_version.outputs.mod_version }}
-            
-            [Need a server? Just click on the Picture, use the code WXRLDS for 25% off of your first month and play with your friends!](https://bisecthosting.com/Wxrlds)
-            
-            [![Bisect Hosting](https://www.bisecthosting.com/partners/custom-banners/7ac5059a-f314-47ac-8598-45d00bd20eb4.png)](https://bisecthosting.com/Wxrlds)
-            
-            ${{ steps.get_changelog.outputs.changelog }}
+            ${{ steps.info.outputs.mod_version }}
 
-          curseforge-dependencies: |
-            botany-pots(required)
-            ender-storage-1-8(required)
-            the-one-probe(optional)
-            jei(optional)
-             botany-pots-tiers(optional)
+            [Need a server? Just click on the Picture, use the code WXRLDS for 25% off of your first month and play with your friends!](https://bisecthosting.com/Wxrlds)
+
+            [![Bisect Hosting](https://www.bisecthosting.com/partners/custom-banners/7ac5059a-f314-47ac-8598-45d00bd20eb4.png)](https://bisecthosting.com/Wxrlds)
+
+            ${{ steps.info.outputs.changelog }}
 
           modrinth-dependencies: |
             botany-pots(required)
@@ -137,3 +89,35 @@ jobs:
             the-one-probe(optional)
             jei(optional)
             botany-pots-tiers(optional)
+
+      - name: "Upload to CurseForge"
+        if: ${{ vars.CF_PROJECT_ID != '' }}
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          curseforge-id: ${{ vars.CF_PROJECT_ID }}
+          curseforge-token: ${{ secrets.CF_PROJECT_API_TOKEN }}
+
+          name: ${{ steps.info.outputs.mod_name }}-${{ steps.info.outputs.mod_version }}
+          game-versions: |
+            ${{ steps.info.outputs.minecraft_version }}
+          loaders: |
+            ${{ steps.info.outputs.mod_loader }}
+          version-type: ${{ steps.info.outputs.mod_release_type }}
+          version: ${{ steps.info.outputs.mod_version }}
+          curseforge-files: build/libs/*.jar
+
+          changelog: |
+            ${{ steps.info.outputs.mod_version }}
+
+            [Need a server? Just click on the Picture, use the code WXRLDS for 25% off of your first month and play with your friends!](https://bisecthosting.com/Wxrlds)
+
+            [![Bisect Hosting](https://www.bisecthosting.com/partners/custom-banners/7ac5059a-f314-47ac-8598-45d00bd20eb4.png)](https://bisecthosting.com/Wxrlds)
+
+            ${{ steps.info.outputs.changelog }}
+
+          curseforge-dependencies: |
+            botany-pots(required)
+            ender-storage-1-8(required)
+            the-one-probe(optional)
+            jei(optional)
+             botany-pots-tiers(optional)

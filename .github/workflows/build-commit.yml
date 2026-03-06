@@ -1,47 +1,48 @@
-# Used when a commit is pushed to the repository
-# This makes use of caching for faster builds and uploads the resulting artifacts
-# Reference https://github.com/CaffeineMC/sodium/blob/dc7dc4c634316ac8b510d2dc8290079ebc462778/.github/workflows/build-commit.yml
-name: build-commit
+name: "build-commit"
 
 on:
   push:
     branches:
-      - '**' # All branches so this does not get triggered, when pushing tags
+      - "**" # All branches but not on tags
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-latest"
 
     steps:
+      - name: "Checkout repository"
+        uses: "actions/checkout@v6"
 
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: "Get mod info"
+        id: "info"
+        shell: bash
+        run: |
+          chmod +x .github/scripts/get_mod_info.sh
+          .github/scripts/get_mod_info.sh
 
-      - name: Validate Gradle Wrapper
-        uses: gradle/actions/wrapper-validation@v3
-
-      - name: Setup JDK 17
-        uses: actions/setup-java@v4
+      - name: "Setup JDK ${{ steps.info.outputs.java_version }}"
+        uses: "actions/setup-java@v5"
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "${{ steps.info.outputs.java_version }}"
+          distribution: "temurin"
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - name: "Setup Gradle"
+        uses: "gradle/actions/setup-gradle@v4"
         with:
           cache-read-only: false
 
-      - name: Build with Gradle
-        run: ./gradlew build
+      - name: "Build with Gradle"
+        run: |
+          ./gradlew build
 
-      - name: Extract current branch name
-        id: get_branch
+      - name: "Extract current branch name"
+        id: "get_branch"
         run: |
           ref="${GITHUB_REF#refs/heads/}"
           echo "branch=${ref////-}" >> $GITHUB_OUTPUT
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - name: "Upload artifacts"
+        uses: "actions/upload-artifact@v4"
         with:
-          name: enderbotanypots-artifacts-${{ steps.get_branch.outputs.branch }}
+          name: "${{ steps.info.outputs.mod_id }}-artifacts-${{ steps.get_branch.outputs.branch }}-${{ github.run_number }}"
           path: build/libs/*.jar
